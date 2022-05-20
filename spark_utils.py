@@ -70,3 +70,32 @@ def get_dataset(df, select_data, n_months=12):
         del red
         
     return base_df
+
+
+def preprocess_data(data):
+    # replace 0 birthyear if filled out later
+    proper_bdays = data[['ID Number', 'B-day']].groupby('ID Number').max().to_dict()['B-day']
+    data['B-day'] = [(d if (2019 - d) > 5 else proper_bdays[i]) for i, d in zip(data['ID Number'], data['B-day'])]
+    
+    # drop anything that couldn't be fixed
+    data['age'] = (2019 - data['B-day']).astype('int')
+    data = data[(data['age'] > 5) & (data['age'] < 110)].copy()
+    
+    # unify flag columns
+    data.loc[data['Flag'] == 'wi', 'Flag'] = 'i'
+    data.loc[data['Flag'] == 'w', 'Flag'] = ''
+    
+    string_cols = ['Name', 'Tit', 'WTit', 'OTit', 'FOA', 'Flag']
+    data[string_cols] = data[string_cols].fillna('')
+    
+    # process titles
+    female_tit = ["None", "WCM", "WFM", "WIM", "WGM"]
+    tit = ["None", "CM", "FM", "IM", "GM"]
+
+    female_tit = {t: i for i, t in enumerate(female_tit)}
+    tit = {t: i for i, t in enumerate(tit)}
+
+    data['tit'] = [(0 if t not in tit else tit[t]) for t in data['Tit']]
+    data['wtit'] = [(0 if t not in female_tit else female_tit[t]) for t in data['Tit']]
+    
+    return data
