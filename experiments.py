@@ -11,7 +11,7 @@ def _parse_column(c):
     
     year = c_data[1]
     if 'yearly' in c:
-        return year, None
+        return int(year), None
     
     mon = c_data[2]
     return int(year), int(mon)
@@ -104,7 +104,7 @@ def create_dataset(df, n_months=12, last_year=2019, last_month=None, bins='group
         
         baseline = np.zeros(ydata.shape)
     else:
-        ydata = curr if not continuous_diff else (curr - prev)
-        baseline = prev if not continuous_diff else np.zeros(curr.shape)
+        ydata = yorig[curr] if not continuous_diff else (yorig[curr] - xorig[prev])
+        baseline = xorig[prev] if not continuous_diff else np.zeros(yorig[curr].shape)
         
     return xorig, yorig, xdata, ydata, baseline

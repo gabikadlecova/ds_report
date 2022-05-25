@@ -1,2 +1,5 @@
 .ipynb_checkpoints/
 chess_ratings/
+*.csv
+*.pickle
+__pycache__/
